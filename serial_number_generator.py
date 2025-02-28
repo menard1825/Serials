@@ -13,14 +13,18 @@ def create_serials_excel(client_name, order_number, product_data):
     header_color = "004785"
     separator_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
 
-    # Add Safari Micro Logo (Assuming logo file is present)
-    img_path = "safari_micro_logo.png"  # Ensure the file is in the correct directory
+    # Add Safari Micro Logo from URL
+    img_url = "https://safarimicro.com/wp-content/uploads/2022/01/SafariMicro-Color-with-Solid-Icon-Copy.png"
     try:
-        from openpyxl.drawing.image import Image
-        logo = Image(img_path)
-        ws.add_image(logo, "A1")
+        from PIL import Image
+        import requests
+        from io import BytesIO
+        response = requests.get(img_url)
+        if response.status_code == 200:
+            logo = Image.open(BytesIO(response.content))
+            ws.add_image(logo, "A1")
     except:
-        pass  # Prevent crash if image is missing
+        pass  # Prevent crash if image fails to load
 
     # Header formatting
     ws.merge_cells("A1:D3")
@@ -71,7 +75,7 @@ def create_serials_excel(client_name, order_number, product_data):
 
 # Streamlit UI
 st.set_page_config(page_title="Safari Micro Serial Number to Excel Tool", page_icon="📄", layout="centered")
-st.image("safari_micro_logo.png", width=300)  # Ensure logo is present in directory
+st.image("https://safarimicro.com/wp-content/uploads/2022/01/SafariMicro-Color-with-Solid-Icon-Copy.png", width=300)
 
 st.title("Safari Micro Serial Number to Excel Tool")
 
