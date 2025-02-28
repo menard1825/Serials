@@ -55,21 +55,21 @@ def create_serials_excel(client_name, order_number, product_data):
 # Streamlit UI
 st.title("Safari Micro - Serial Number Generator")
 
-client_name = st.text_input("Client Name")
-order_number = st.text_input("Order Number")
+client_name = st.text_input("Client Name", key="client_name")
+order_number = st.text_input("Order Number", key="order_number")
 
 st.write("Enter Product Details Below:")
 
 product_data = []
-num_products = st.number_input("Number of Line Items", min_value=1, step=1)
+num_products = st.number_input("Number of Line Items", min_value=1, step=1, key="num_products")
 
 for i in range(num_products):
-    product_name = st.text_input(f"Product {i+1} Name")
-    model_number = st.text_input(f"Product {i+1} Model Number")
-    serial_input = st.text_area(f"Enter Serial Numbers for {product_name} (comma-separated)", "")
+    product_name = st.text_input(f"Product {i+1} Name", key=f"product_name_{i}")
+    model_number = st.text_input(f"Product {i+1} Model Number", key=f"model_number_{i}")
+    serial_input = st.text_area(f"Enter Serial Numbers for Product {i+1} (comma-separated)", "", key=f"serial_input_{i}")
     serials = [s.strip() for s in serial_input.split(",") if s.strip()]
     product_data.append((product_name, model_number, serials))
 
-if st.button("Generate Excel File"):
+if st.button("Generate Excel File", key="generate_excel"):
     excel_data = create_serials_excel(client_name, order_number, product_data)
     st.download_button(label="Download Excel File", data=excel_data, file_name="SafariMicro_Serials.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
