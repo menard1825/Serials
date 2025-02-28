@@ -9,10 +9,23 @@ def create_serials_excel(client_name, order_number, product_data):
     ws = wb.active
     ws.title = "Serial Numbers"
 
+    # Safari Micro branding colors
+    header_color = "004785"
+    separator_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+
+    # Add Safari Micro Logo (Assuming logo file is present)
+    img_path = "safari_micro_logo.png"  # Ensure the file is in the correct directory
+    try:
+        from openpyxl.drawing.image import Image
+        logo = Image(img_path)
+        ws.add_image(logo, "A1")
+    except:
+        pass  # Prevent crash if image is missing
+
     # Header formatting
     ws.merge_cells("A1:D3")
     ws["A4"] = "Safari Micro - Serial Number Report"
-    ws["A4"].font = Font(size=16, bold=True, color="004785")
+    ws["A4"].font = Font(size=16, bold=True, color=header_color)
     ws["A4"].alignment = Alignment(horizontal="left")
 
     # Customer message
@@ -31,11 +44,15 @@ def create_serials_excel(client_name, order_number, product_data):
     for col in range(1, 4):
         ws.cell(row=13, column=col).font = Font(bold=True, color="FFFFFF")
         ws.cell(row=13, column=col).alignment = Alignment(horizontal="center")
-        ws.cell(row=13, column=col).fill = PatternFill(start_color="004785", end_color="004785", fill_type="solid")
+        ws.cell(row=13, column=col).fill = PatternFill(start_color=header_color, end_color=header_color, fill_type="solid")
 
-    # Insert serial numbers
+    # Insert serial numbers with separators for multiple products
     row_index = 14
     for product, model, serial_numbers in product_data:
+        if row_index > 14:
+            ws[f"A{row_index}"] = "---"
+            ws[f"A{row_index}"].fill = separator_fill
+            row_index += 1
         for serial in serial_numbers:
             ws[f"A{row_index}"] = product
             ws[f"B{row_index}"] = model
@@ -53,7 +70,10 @@ def create_serials_excel(client_name, order_number, product_data):
     return output.getvalue()
 
 # Streamlit UI
-st.title("Safari Micro - Serial Number Generator")
+st.set_page_config(page_title="Safari Micro Serial Number to Excel Tool", page_icon="📄", layout="centered")
+st.image("safari_micro_logo.png", width=300)  # Ensure logo is present in directory
+
+st.title("Safari Micro Serial Number to Excel Tool")
 
 client_name = st.text_input("Client Name", key="client_name")
 order_number = st.text_input("Order Number", key="order_number")
