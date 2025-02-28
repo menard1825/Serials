@@ -4,13 +4,13 @@ from io import BytesIO
 import openpyxl
 from openpyxl.styles import Font, Alignment, PatternFill
 
-def create_serials_excel(client_name, order_number, product_name, serial_numbers):
+def create_serials_excel(client_name, order_number, product_data):
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Serial Numbers"
 
     # Header formatting
-    ws.merge_cells("A1:C3")
+    ws.merge_cells("A1:D3")
     ws["A4"] = "Safari Micro - Serial Number Report"
     ws["A4"].font = Font(size=16, bold=True, color="004785")
     ws["A4"].alignment = Alignment(horizontal="left")
@@ -24,7 +24,6 @@ def create_serials_excel(client_name, order_number, product_name, serial_numbers
     # Order details
     ws["A9"], ws["B9"] = "Client Name:", client_name
     ws["A10"], ws["B10"] = "Order Number:", order_number
-    ws["A11"], ws["B11"] = "Product:", product_name
 
     # Table headers
     headers = ["Product", "Model Number", "Serial Number"]
@@ -35,9 +34,13 @@ def create_serials_excel(client_name, order_number, product_name, serial_numbers
         ws.cell(row=13, column=col).fill = PatternFill(start_color="004785", end_color="004785", fill_type="solid")
 
     # Insert serial numbers
-    for i, serial in enumerate(serial_numbers, start=14):
-        ws[f"A{i}"] = product_name
-        ws[f"C{i}"] = serial
+    row_index = 14
+    for product, model, serial_numbers in product_data:
+        for serial in serial_numbers:
+            ws[f"A{row_index}"] = product
+            ws[f"B{row_index}"] = model
+            ws[f"C{row_index}"] = serial
+            row_index += 1
     
     # Adjust column width
     ws.column_dimensions["A"].width = 25
@@ -54,12 +57,19 @@ st.title("Safari Micro - Serial Number Generator")
 
 client_name = st.text_input("Client Name")
 order_number = st.text_input("Order Number")
-product_name = st.text_input("Product Name")
 
-st.write("Paste serial numbers below (comma-separated):")
-serial_input = st.text_area("Enter Serial Numbers", "")
+st.write("Enter Product Details Below:")
+
+product_data = []
+num_products = st.number_input("Number of Line Items", min_value=1, step=1)
+
+for i in range(num_products):
+    product_name = st.text_input(f"Product {i+1} Name")
+    model_number = st.text_input(f"Product {i+1} Model Number")
+    serial_input = st.text_area(f"Enter Serial Numbers for {product_name} (comma-separated)", "")
+    serials = [s.strip() for s in serial_input.split(",") if s.strip()]
+    product_data.append((product_name, model_number, serials))
 
 if st.button("Generate Excel File"):
-    serials = [s.strip() for s in serial_input.split(",") if s.strip()]
-    excel_data = create_serials_excel(client_name, order_number, product_name, serials)
+    excel_data = create_serials_excel(client_name, order_number, product_data)
     st.download_button(label="Download Excel File", data=excel_data, file_name="SafariMicro_Serials.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
