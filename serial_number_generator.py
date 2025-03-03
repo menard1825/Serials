@@ -137,4 +137,5 @@ if data_type in ["Software - License Keys", "Both"]:
 
 if st.button("Generate Excel File", key="generate_excel"):
     excel_data = create_serials_excel(client_name, order_number, client_po, hardware_data, software_data)
-    st.download_button(label="Download Excel File", data=excel_data, file_name="SafariMicro_Serials_Licenses.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    file_name = f"SafariMicro_{client_name}_{order_number}.xlsx".replace(" ", "_")
+    st.download_button(label="Download Excel File", data=excel_data, file_name=file_name, mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
